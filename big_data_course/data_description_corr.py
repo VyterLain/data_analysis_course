@@ -10,18 +10,18 @@ for all data
 '''
 
 des = df.describe()
-des.to_csv(r"output/description.csv", index=True, header=True)
+des.to_csv(r"output/description/description.csv", index=True, header=True)
 print(des)
 
 corr = df.corr()
-corr.to_csv(r"output/corr.csv", index=True, header=True)
+corr.to_csv(r"output/description/corr.csv", index=True, header=True)
 
 fig = plt.figure(figsize=(10, 8))
 ax = fig.add_subplot(111)
 plt.title("abalone correlation")
 labels = ['Length', 'Diam', 'Height', 'Whole', 'Shucked', 'Viscera', 'Shell', 'Rings', ]
 p = sns.heatmap(corr, ax=ax, annot=True, xticklabels=labels, yticklabels=labels, cmap=plt.get_cmap('Greens'))
-plt.savefig(r"output/corr_heatmap.png")
+plt.savefig(r"output/description/corr_heatmap.png")
 plt.show()
 
 sns.set(style='whitegrid', color_codes=True)
@@ -35,7 +35,7 @@ for group data, group by sex
 group = df.groupby('Sex')
 for key, df_sex in group:
     df_sex.to_csv(r"data/description_" + key + ".csv", index=False, header=True)
-    df_sex.describe().to_csv(r"output/description_" + key + ".csv", index=True, header=True)
+    df_sex.describe().to_csv(r"output/description/description_" + key + ".csv", index=True, header=True)
 
 for key, df_sex in group:
     corr = df_sex.corr()
@@ -44,7 +44,7 @@ for key, df_sex in group:
     plt.title("abalone correlation of " + key)
     labels = ['Length', 'Diam', 'Height', 'Whole', 'Shucked', 'Viscera', 'Shell', 'Rings', ]
     p = sns.heatmap(corr, ax=ax, annot=True, xticklabels=labels, yticklabels=labels, cmap=plt.get_cmap('Greens'))
-    plt.savefig(r"output/corr_heatmap_" + key + ".png")
+    plt.savefig(r"output/description/corr_heatmap_" + key + ".png")
     plt.show()
 
 df_F = group.get_group('F')
