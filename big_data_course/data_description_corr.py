@@ -34,7 +34,7 @@ for group data, group by sex
 
 group = df.groupby('Sex')
 for key, df_sex in group:
-    df_sex.to_csv(r"data/description_" + key + ".csv", index=False, header=True)
+    df_sex.to_csv(r"data/abalone_" + key + ".csv", index=False, header=True)
     df_sex.describe().to_csv(r"output/description/description_" + key + ".csv", index=True, header=True)
 
 for key, df_sex in group:
