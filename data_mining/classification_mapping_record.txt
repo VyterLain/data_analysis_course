@@ -1,0 +1,5 @@
+{'Male': 0, 'Female': 1}
+{'Married': 0, 'Unknown': 1, 'Single': 2, 'Divorce': 3}
+{'Second-Hand': 0, 'Frist-Hand': 1}
+{'Average_Capital_Plus_Interest_Repayment': 0, 'Matching_The_Principal_Repayment': 1}
+{360: 0, 300: 1, 240: 2, 180: 3, 120: 4, 60: 5}
