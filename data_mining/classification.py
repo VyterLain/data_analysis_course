@@ -2,7 +2,9 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
 
+'''导入数据'''
 df = pd.read_csv('./data/credit.csv')
+raw = df.copy(deep=True)
 # pd.set_option('display.max_columns', None)
 cols = df.columns
 
@@ -28,7 +30,24 @@ print(des)
 # pd.reset_option('display.float_format')
 # 对于将一个属性划分为几类是一个关键问题
 discrete_column_k = [5, 5, 5, 5, 5]
-discrete_type = 2
+discrete_type = 0
+
+
+# 可视化
+def cluster_plot(cd, ck, raw_data, col_n, way_n, save=True):
+    import matplotlib.pyplot as plt
+    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['axes.unicode_minus'] = False
+    plt.figure(figsize=(12, 4))
+    for j in range(0, ck):
+        plt.plot(raw_data[col_n][cd == j], [j for _i in cd[cd == j]], 'o')
+    plt.title(col_n)
+    plt.ylim(-0.5, ck - 0.5)
+    if save:
+        plt.savefig(r'./data/discrete_scatter_' + way_n + '_' + col_n + '.png')
+    return plt
+
+
 for r in range(0, 5):
     i = discrete_column_index[r]
     c = discrete_columns[r]
@@ -36,11 +55,10 @@ for r in range(0, 5):
     if discrete_type == 0:
         # 等宽法，存在一个问题，会受到极端值的严重影响
         df.iloc[:, i] = pd.cut(df[c], k, labels=range(k))
+        # 画图看效果，果然不是很棒，等频率法不考虑
+        cluster_plot(df[c], k, raw, c, way_n='width', save=True)
     elif discrete_type == 1:
-        # 等频率法，存在一个问题，可能会将不该是一类的数据分在一起
-        df.iloc[:, i] = pd.qcut(df[c], k, labels=range(k))
-    elif discrete_type == 2:
-        # K-Means聚类法
+        # K-Means聚类法，存在的极端值应该可以被独自划分为一类，类似于将异常值单独考虑的效果
         useless = 1  # TODO
 
 '''处理缺失值'''
@@ -52,12 +70,34 @@ print()
 miss_index = np.where(isNA)
 df['MONTHLY_INCOME_WHITHOUT_TAX'] = pd.to_numeric(df['MONTHLY_INCOME_WHITHOUT_TAX'], errors='coerce')
 for i in range(0, len(miss_index[0])):
-    df.iloc[miss_index[0][i],miss_index[1][i]] = discrete_column_k[1]
+    df.iloc[miss_index[0][i], miss_index[1][i]] = discrete_column_k[1]
 df['MONTHLY_INCOME_WHITHOUT_TAX'] = df['MONTHLY_INCOME_WHITHOUT_TAX'].astype(int)
-# print(max(df['MONTHLY_INCOME_WHITHOUT_TAX']))
+# 保存离散化后的数据
 # if discrete_type == 0:
 #     df.to_csv(r'./data/discrete_data_width.csv', header=True, index=True)
 # elif discrete_type == 1:
-#     df.to_csv(r'./data/discrete_data_freq.csv', header=True, index=True)
-# elif discrete_type == 2:
 #     df.to_csv(r'./data/discrete_data_kmeans.csv', header=True, index=True)
+
+'''保存离散化的规则'''
+
+
+def save_criteria_discrete(f, raw_data, dis_data):
+    for sr in range(0, 5):
+        sc = discrete_columns[sr]
+        f.write(sc + ':\n')
+        sk = discrete_column_k[sr]
+        for sub_k in range(0, sk + 1):
+            sub = raw_data[dis_data[c] == sub_k]
+            if sub.empty:
+                continue
+            s = str(sub_k) + ': min = ' + str(min(sub[sc])) + ' ,max = ' + str(max(sub[sc]))
+            f.write('\t' + s + '\n')
+
+# if discrete_type == 0:
+#     discrete_f = open(r'./data/discrete_criteria_width.txt', 'w')
+#     save_criteria_discrete(discrete_f, raw, df)
+#     discrete_f.close()
+# elif discrete_type == 1:
+#     discrete_f = open(r'./data/discrete_criteria_kmeans.txt', 'w')
+#     save_criteria_discrete(discrete_f, raw, df)
+#     discrete_f.close()
