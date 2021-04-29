@@ -1,0 +1,31 @@
+AGE:
+	0: min = 33 ,max = 38
+	1: min = 39 ,max = 46
+	2: min = 18 ,max = 27
+	3: min = 47 ,max = 67
+	4: min = 28 ,max = 32
+MONTHLY_INCOME_WHITHOUT_TAX:
+	0: min = 0.0 ,max = 1000000.0
+	1: min = 833333333.3 ,max = 833333333.3
+	2: min = 83789551.0 ,max = 83789551.0
+	3: min = 5000000.0 ,max = 12500000.0
+	4: min = 28129588.0 ,max = 28129588.0
+	5: min = nan ,max = nan
+GAGE_TOTLE_PRICE:
+	0: min = 118165.0 ,max = 709142.71
+	1: min = 1372124.99 ,max = 2695672.08
+	2: min = 6630534.0 ,max = 12230958.96
+	3: min = 710060.86 ,max = 1362524.0
+	4: min = 2809175.4 ,max = 5113772.0
+APPLY_AMOUNT:
+	0: min = 60000.0 ,max = 410000.0
+	1: min = 970000.0 ,max = 1960000.0
+	2: min = 2540000.0 ,max = 4300000.0
+	3: min = 417000.0 ,max = 940000.0
+	4: min = 5240000.0 ,max = 7120000.0
+APPLY_INTEREST_RATE:
+	0: min = 1.8978 ,max = 4.59
+	1: min = 5.7375 ,max = 6.273
+	2: min = 4.896 ,max = 5.1084
+	3: min = 6.426 ,max = 8.6928
+	4: min = 5.184 ,max = 5.51
