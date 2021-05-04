@@ -32,7 +32,6 @@ des = df_sub.describe()
 discrete_column_k = [5, 5, 5, 5, 5]
 discrete_type = 1
 
-
 # 可视化
 # def cluster_plot(cd, ck, raw_data, col_n, way_n, save=True):
 #     import matplotlib.pyplot as plt
@@ -87,9 +86,9 @@ for i in range(0, len(miss_index[0])):
 df['MONTHLY_INCOME_WHITHOUT_TAX'] = df['MONTHLY_INCOME_WHITHOUT_TAX'].astype(int)
 # 保存离散化后的数据
 # if discrete_type == 0:
-#     df.to_csv(r'./data/discrete_data_width.csv', header=True, index=True)
+#     df.to_csv(r'./data/discrete_data_width.csv', header=True, index=False)
 # elif discrete_type == 1:
-#     df.to_csv(r'./data/discrete_data_kmeans.csv', header=True, index=True)
+#     df.to_csv(r'./data/discrete_data_kmeans.csv', header=True, index=False)
 
 '''保存离散化的规则'''
 
@@ -115,5 +114,22 @@ df['MONTHLY_INCOME_WHITHOUT_TAX'] = df['MONTHLY_INCOME_WHITHOUT_TAX'].astype(int
 #     discrete_f.close()
 
 '''决策树'''
+import myDecisionTree
+
+data = df.values
+# 抛弃第0列，id列
+data = data[:, 1:]
+# 全部数据训练
+labels = list(cols[1:])
+# 当前过拟合
+# TODO 调参，即每个属性分类数
+mytree = myDecisionTree.create_tree(data, labels, 'id3')
+# myDecisionTree.create_plot(mytree)
+accuracy = myDecisionTree.accuracy(mytree, data, labels)
+print(accuracy)
+# 剪枝
+# 留一交叉验证结果
+
+# K折交叉验证结果
 
 '''结果评价'''
