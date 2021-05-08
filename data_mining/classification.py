@@ -5,7 +5,6 @@ import numpy as np
 '''导入数据'''
 df = pd.read_csv('./data/credit.csv')
 raw = df.copy(deep=True)
-# pd.set_option('display.max_columns', None)
 cols = df.columns
 
 '''类别数据转化为数值数据'''
@@ -29,7 +28,7 @@ des = df_sub.describe()
 # print(des)
 # pd.reset_option('display.float_format')
 # 对于将一个属性划分为几类是一个关键问题
-discrete_column_k = [5, 5, 5, 5, 5]
+discrete_column_k = [5, 3, 5, 4, 5]
 discrete_type = 1
 
 # 可视化
@@ -76,7 +75,6 @@ for r in range(0, 5):
 
 '''处理缺失值'''
 isNA = df.isnull()
-# print(isNA.any())
 # 经过观察，缺失值只存在于MONTHLY_INCOME_WHITHOUT_TAX
 # 缺失值单独归为一类
 miss_index = np.where(isNA)
@@ -84,13 +82,8 @@ df['MONTHLY_INCOME_WHITHOUT_TAX'] = pd.to_numeric(df['MONTHLY_INCOME_WHITHOUT_TA
 for i in range(0, len(miss_index[0])):
     df.iloc[miss_index[0][i], miss_index[1][i]] = discrete_column_k[1]
 df['MONTHLY_INCOME_WHITHOUT_TAX'] = df['MONTHLY_INCOME_WHITHOUT_TAX'].astype(int)
-# 保存离散化后的数据
-# if discrete_type == 0:
-#     df.to_csv(r'./data/discrete_data_width.csv', header=True, index=False)
-# elif discrete_type == 1:
-#     df.to_csv(r'./data/discrete_data_kmeans.csv', header=True, index=False)
 
-'''保存离散化的规则'''
+'''保存 离散化的规则 离散化后的数据'''
 
 # def save_criteria_discrete(f, raw_data, dis_data):
 #     for sr in range(0, 5):
@@ -104,14 +97,17 @@ df['MONTHLY_INCOME_WHITHOUT_TAX'] = df['MONTHLY_INCOME_WHITHOUT_TAX'].astype(int
 #             s = str(sub_k) + ': min = ' + str(min(sub[sc])) + ' ,max = ' + str(max(sub[sc]))
 #             f.write('\t' + s + '\n')
 
+
 # if discrete_type == 0:
 #     discrete_f = open(r'./data/discrete_criteria_width.txt', 'w')
 #     save_criteria_discrete(discrete_f, raw, df)
 #     discrete_f.close()
+#     df.to_csv(r'./data/discrete_data_width.csv', header=True, index=False)
 # elif discrete_type == 1:
 #     discrete_f = open(r'./data/discrete_criteria_kmeans.txt', 'w')
 #     save_criteria_discrete(discrete_f, raw, df)
 #     discrete_f.close()
+#     df.to_csv(r'./data/discrete_data_kmeans.csv', header=True, index=False)
 
 '''决策树'''
 import myDecisionTree
@@ -122,14 +118,48 @@ data = data[:, 1:]
 # 全部数据训练
 labels = list(cols[1:])
 # 当前过拟合
-# TODO 调参，即每个属性分类数
-mytree = myDecisionTree.create_tree(data, labels, 'id3')
+mytree = myDecisionTree.create_tree(data, labels, 'c45')
 # myDecisionTree.create_plot(mytree)
 accuracy = myDecisionTree.accuracy(mytree, data, labels)
-print(accuracy)
+# print(accuracy)
+# 剪枝
+cut_tree = myDecisionTree.cut_branch_rep(mytree, data, labels)
+# myDecisionTree.create_plot(cut_tree)
+cut_accuracy = myDecisionTree.accuracy(cut_tree, data, labels)
+# print(cut_accuracy)
+prob_count = []
+prob_tree = myDecisionTree.count_label(cut_tree, data, labels, '1', prob_count, True)
+# myDecisionTree.create_plot(prob_tree)
 # 剪枝
 # 留一交叉验证结果
-
-# K折交叉验证结果
+accuracy_count = []
+predict_count = []
+for i in range(len(data)):
+    print("doing " + str(round(float(100 * (i + 1) / len(data)), 2)) + "%")
+    verify_data = data[i]
+    # left_data = data[:, :]
+    left_data = np.delete(data, i, axis=0)
+    v_tree = myDecisionTree.create_tree(left_data, labels, 'c45')
+    cut_v_tree = myDecisionTree.cut_branch_rep(v_tree, left_data, labels)
+    accuracy_count.append(myDecisionTree.accuracy(cut_v_tree, left_data, labels))
+    pl = myDecisionTree.predict(cut_v_tree, labels, verify_data)
+    if str(pl) == str(verify_data[0]):
+        predict_count.append(True)
+    else:
+        predict_count.append(False)
+print(accuracy_count)
+print(predict_count)
+validation_f = open(r'./data/validation_count.txt', 'w')
+for i in range(len(accuracy_count)):
+    validation_f.write(str(accuracy_count[i][2]) + ' ' + str(predict_count[i]) + '\n')
+validation_f.close()
+print(np.mean(accuracy_count))
+print("predict right: " + str(np.sum(predict_count == True)) +
+      ", predict wrong: " + str(np.sum(predict_count == False)))
 
 '''结果评价'''
+all_labels = [ex[0] for ex in data]
+all_prob = [myDecisionTree.predict(cut_tree, labels, ex) for ex in data]
+# ROC
+
+# KS

@@ -1,23 +1,18 @@
 import math
 import operator
-import random
-import copy
 
 import numpy as np
 from matplotlib import pyplot as plt
 
 '''
 两个决策树：ID3 和 C4.5
-该包中的功能
 part 1 手写
 1、创建决策树 => done: create_tree(train, labels: list, tree_type='c45')
-2、进行剪枝（策略：
-3、功能函数 => todo: predict(tree, labels, obj), accuracy(tree, data, labels: list)
-part 2 调包
-1、使用sklearn中的决策树算法进行训练
+2、进行剪枝（仅实现了一个REP） => done: cut_branch_rep(tree, data, labels: list)
+3、功能函数 => done: predict(tree, labels, obj), accuracy(tree, data, labels: list)
+                    count_label(tree, data, labels: list, label: str, count: list, generate_prob_tree=False)
+part 2 调包,使用sklearn中的决策树算法进行训练 => skipped
 part 3 ROC 和 KS => done: eval_plot(true_label: list, prob: list, eval_type='ROC', save_path=None)
-1、ROC曲线 => done
-2、KS曲线 => done
 part 4 画决策树 => done: create_plot(tree)
 '''
 
@@ -139,6 +134,15 @@ def choose_best_feature_c45(train):
 
 
 def create_tree(train, labels: list, tree_type='c45'):
+    np.random.seed(1)
+    all_features = {}
+    for i in range(1, len(labels)):
+        f_set = set([ex[i] for ex in train])
+        all_features[labels[i]] = f_set
+    return __create_tree(train, labels, tree_type, all_features)
+
+
+def __create_tree(train, labels: list, tree_type, all_feature_set):
     """
     使用递归的方式构建决策树
     (标签=>值=>类型) => (标签=>值=>类型) => ...
@@ -163,15 +167,21 @@ def create_tree(train, labels: list, tree_type='c45'):
         best_feature = choose_best_feature_c45(train)
     if best_feature == -1:
         # 这说明存在条件相同的两个记录，但是label不同，随机选择一个feature
-        best_feature = random.randint(1, len(_labels) - 1)
+        best_feature = np.random.randint(1, len(_labels))
     best_feature_label = _labels[best_feature]
     tree = {best_feature_label: {}}
     feature_set = set([ex[best_feature] for ex in train])
     # 递归构建分类树
     del _labels[best_feature]
-    for feature in feature_set:
-        next_train = filter_by_feature(train, best_feature, feature)
-        tree[best_feature_label][feature] = create_tree(next_train, _labels, tree_type)
+    # for feature in feature_set:
+    #     next_train = filter_by_feature(train, best_feature, feature)
+    #     tree[best_feature_label][feature] = __create_tree(next_train, _labels, tree_type, all_feature_set)
+    for feature in all_feature_set[best_feature_label]:
+        if feature in feature_set:
+            next_train = filter_by_feature(train, best_feature, feature)
+            tree[best_feature_label][feature] = __create_tree(next_train, _labels, tree_type, all_feature_set)
+        else:
+            tree[best_feature_label][feature] = 0
     return tree
 
 
@@ -238,7 +248,9 @@ def count_label(tree, data, labels: list, label: str, count: list, generate_prob
     """
     if generate_prob_tree:
         if not isinstance(tree, dict):
-            return float(count[-1][0] / (count[-1][0] + count[-1][1]))
+            if (count[-1][0] + count[-1][1]) == 0:
+                return 0
+            return round(float(count[-1][0] / (count[-1][0] + count[-1][1])), 2)
     _labels = labels[:]
     root = list(tree.keys())[0]
     p_tree = {root: {}}
@@ -270,55 +282,57 @@ def count_label(tree, data, labels: list, label: str, count: list, generate_prob
         return p_tree
 
 
-"""
-def cutBranch(tree, data, lables):
-    '''
-    悲观剪枝 参考：http://www.jianshu.com/p/794d08199e5e
-    old = errorNum + o.5 * L  errorNum:叶子节点错误分类的个数，L：叶子节点个数
-    p = old / N  N:数据样本总个数
-    new = errorNum + o.5
-    S = math.sqrt(N  * p * (1 - p))
-    if new <= old - S then 剪枝
-
-    注：都是自己理解的，如果有不对的地方欢迎指出
-    '''
+def cut_branch_rep(tree, data, labels: list):
+    """
+    进行剪枝，剪枝规则REP
+    :param tree: 要剪枝的树
+    :param data: 原始数据
+    :param labels: 标签列表
+    :return: 剪枝后的树
+    """
+    _labels = labels[:]
     root = list(tree.keys())[0]
-    nextNode = tree[root]
-    index = lables.index(root)
-    newTree = {root: {}}
-    del(lables[index])
-    for key in nextNode.keys():
-        # 如果子节点不是叶子节点就判断其是否满足剪枝
-        if(isinstance(nextNode[key], dict)):
-            A = getLablesByfeature(data, index, key)
+    next_node = tree[root]
+    index = _labels.index(root)
+    new_tree = {root: {}}
+    del _labels[index]
+    for feature in next_node.keys():
+        # 当不是叶节点是，判断是否可以进行剪枝操作
+        if isinstance(next_node[feature], dict):
+            filter_data = filter_by_feature(data, index, feature)
+            # 获取该节点下的分类正确情况
             count = []
-            # 获取每个叶子节点的(正确分类数，错误分类数)
-            getCount(nextNode[key], A, lables[:], count)
-            allnum = 0
-            errornum = 0
-            for i in count:
-                allnum += i[0] + i[1]
-                errornum += i[1]
-            if(errornum == 0):
-                # 当该子树不存在错误分类的时候，不对该树进行剪枝操作
-                # 进行下个循环
-                newTree[root][key] = nextNode[key]
+            count_accuracy(next_node[feature], filter_data, _labels, count)
+            whole = 0
+            wrong = 0
+            for c in count:
+                whole += (c[0] + c[1])
+                wrong += c[1]
+            # 如果该节点分类不存在错误，无需剪枝
+            if wrong == 0:
+                new_tree[root][feature] = next_node[feature]
                 continue
-            old = errornum + len(count) * 0.5
-            new = errornum + 0.5
-            p = old / allnum
-            S = math.sqrt(allnum * p * (1 - p))
-            if(new <= old - S):
-                # 用当前分类时出现最多的lables代替该子树
-                classList = [item[-1] for item in A]
-                newTree[root][key] = majorityCnt(classList)
+            # 当前的错误率
+            wrong_rate = float(wrong / whole)
+            # 开始计算剪枝后的错误率
+            # 得到剪枝后的label list
+            label_list = [ex[0] for ex in filter_data]
+            pruned_label = count_majority_labels(label_list)
+            if len(label_list) != whole:
+                print("sth. wrong")
+            pruned_false = 0
+            for a in label_list:
+                if a != pruned_label:
+                    pruned_false += 1
+            pruned_wrong_rate = float(pruned_false / whole)
+            if pruned_wrong_rate <= wrong_rate:
+                new_tree[root][feature] = pruned_label
             else:
-                # 不满足剪枝则进入其子树内部继续进行剪枝操作
-                newTree[root][key] = cutBranch(nextNode[key], A, lables[:])
+                new_tree[root][feature] = cut_branch_rep(next_node[feature], filter_data, _labels)
+        # 如果是叶节点，则赋值即可
         else:
-            newTree[root][key] = nextNode[key]
-    return newTree
-"""
+            new_tree[root][feature] = next_node[feature]
+    return new_tree
 
 
 def accuracy(tree, data, labels: list):
