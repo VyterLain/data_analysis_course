@@ -151,6 +151,8 @@ def __create_tree(train, labels: list, tree_type, all_feature_set):
     :param tree_type:构建树的方法
     :return:树
     """
+    # if len(train) == 0:
+    #     return -1
     _labels = labels[:]
     label_list = [ex[0] for ex in train]
     # 递归会在当前分类全部label都相同的时候停止
@@ -173,15 +175,15 @@ def __create_tree(train, labels: list, tree_type, all_feature_set):
     feature_set = set([ex[best_feature] for ex in train])
     # 递归构建分类树
     del _labels[best_feature]
-    # for feature in feature_set:
-    #     next_train = filter_by_feature(train, best_feature, feature)
-    #     tree[best_feature_label][feature] = __create_tree(next_train, _labels, tree_type, all_feature_set)
-    for feature in all_feature_set[best_feature_label]:
-        if feature in feature_set:
-            next_train = filter_by_feature(train, best_feature, feature)
-            tree[best_feature_label][feature] = __create_tree(next_train, _labels, tree_type, all_feature_set)
-        else:
-            tree[best_feature_label][feature] = 0
+    for feature in feature_set:
+        next_train = filter_by_feature(train, best_feature, feature)
+        tree[best_feature_label][feature] = __create_tree(next_train, _labels, tree_type, all_feature_set)
+    # for feature in all_feature_set[best_feature_label]:
+    #     if feature in feature_set:
+    #         next_train = filter_by_feature(train, best_feature, feature)
+    #         tree[best_feature_label][feature] = __create_tree(next_train, _labels, tree_type, all_feature_set)
+    #     else:
+    #         tree[best_feature_label][feature] = 0
     return tree
 
 
@@ -197,7 +199,10 @@ def predict(tree, labels, obj):
     next_node = tree[root]
     index = labels.index(root)  # 找到root在标签中所对应的索引
     key = obj[index]
-    val = next_node[key]
+    if key in next_node:
+        val = next_node[key]
+    else:
+        return -1
     # 判断是否到达叶节点
     if isinstance(val, dict):
         return predict(val, labels, obj)
@@ -363,7 +368,7 @@ def create_plot(tree):
     绘制完整的图
     :param tree:树
     """
-    fig = plt.figure()
+    fig = plt.figure(figsize=(50, 10))
     fig.clf()
     # 清除坐标轴
     ax_props = dict(xticks=[], yticks=[])
@@ -376,7 +381,8 @@ def create_plot(tree):
     plot_tree.y = 1.0
     # 父节点放在(0.5, 1)的坐标位置
     plot_tree(tree, (0.5, 1.0), '')
-    plt.show()
+    plt.savefig(r'./data/tree.png')
+    # plt.show()
 
 
 def plot_node(text, son, parent, node_type):
@@ -393,7 +399,7 @@ def plot_node(text, son, parent, node_type):
     arrowprops可以指定箭头的风格支持，输入一个字典
     plt.annotate()的详细参数可用__doc__查看，如：print(plt.annotate.__doc__)
     """
-    create_plot.ax.annotate(text, xy=parent, xytext=son, bbox=node_type, arrowprops=arrow)
+    create_plot.ax.annotate(text, xy=parent, xytext=son, bbox=node_type, arrowprops=arrow, size=8)
 
 
 def plot_text_mid(son, parent, text):
