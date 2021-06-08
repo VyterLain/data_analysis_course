@@ -3,14 +3,14 @@ import pandas as pd
 import numpy as np
 
 '''导入数据'''
-df = pd.read_csv('./data/credit.csv')
+df = pd.read_csv('data/Credit.csv')
 raw = df.copy(deep=True)
 cols = df.columns
 
 '''类别数据转化为数值数据'''
 unique_columns = ['GENDER', 'MARITAL_STATUS', 'LOANTYPE', 'PAYMENT_TYPE', 'APPLY_TERM_TIME']
 # unique_columns = ['GENDER', 'MARITAL', 'LOANTYPE', 'TYPE', 'TIME']
-f = open(r'./data/classification_mapping_record.txt', 'w')
+f = open(r'data/classification_mapping_record.txt', 'w')
 for c in unique_columns:
     mapping = {label: idx for idx, label in enumerate(set(df[c]))}
     print(mapping)
@@ -106,12 +106,12 @@ def save_criteria_discrete(f, raw_data, dis_data):
 
 
 if discrete_type == 0:
-    discrete_f = open(r'./data/discrete_criteria_width.txt', 'w')
+    discrete_f = open(r'data/discrete_criteria_width.txt', 'w')
     save_criteria_discrete(discrete_f, raw, df)
     discrete_f.close()
     df.to_csv(r'./data/discrete_data_width.csv', header=True, index=False)
 elif discrete_type == 1:
-    discrete_f = open(r'./data/discrete_criteria_kmeans.txt', 'w')
+    discrete_f = open(r'data/discrete_criteria_kmeans.txt', 'w')
     save_criteria_discrete(discrete_f, raw, df)
     discrete_f.close()
     df.to_csv(r'./data/discrete_data_kmeans.csv', header=True, index=False)
@@ -158,7 +158,7 @@ for i in range(len(data)):
         predict_count.append(False)
 print(accuracy_count)
 print(predict_count)
-validation_f = open(r'./data/validation_count.txt', 'w')
+validation_f = open(r'data/validation_count.txt', 'w')
 for i in range(len(accuracy_count)):
     validation_f.write(str(accuracy_count[i][2]) + ' ' + str(predict_count[i]) + '\n')
 validation_f.close()
@@ -167,6 +167,6 @@ validation_f.close()
 all_labels = [ex[0] for ex in data]
 all_prob = [myDecisionTree.predict(cut_tree, labels, ex) for ex in data]
 # ROC
-myDecisionTree.eval_plot(all_labels, all_prob, 'ROC', './data/roc.png')
+myDecisionTree.eval_plot(all_labels, all_prob, 'ROC', 'data/roc.png')
 # KS
-myDecisionTree.eval_plot(all_labels, all_prob, 'KS', './data/ks.png')
+myDecisionTree.eval_plot(all_labels, all_prob, 'KS', 'data/ks.png')

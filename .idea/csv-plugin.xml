@@ -17,6 +17,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data_mining\data\classify_describe_data_to_discrete.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data_mining\data\discrete_data_kmeans.csv">
           <value>
             <Attribute>

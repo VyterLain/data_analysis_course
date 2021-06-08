@@ -1,6 +1,5 @@
-import myDecisionTree
+from data_mining.mid_job import myDecisionTree
 import numpy as np
-import math
 
 # true_data = np.array([0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1])
 # prob = np.array([0.3, 0.2, 0.1, 0.4, 0.7, 0.15, 0.75, 0.65, 0.45, 0.45, 0.9, 0.8, 0.35, 0.7, 0.85, 0.9])
