@@ -3,35 +3,21 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="\data_mining\data\Credit.csv">
+        <entry key="\data_mining\final_job\data\ec2_cpu_utilization_24ae8d.csv">
           <value>
             <Attribute>
-              <option name="separator" value="," />
+              <option name="separator" value=":" />
             </Attribute>
           </value>
         </entry>
-        <entry key="\data_mining\data\Credit_raw.csv">
+        <entry key="\data_mining\final_job\data\occupancy_t4013.csv">
           <value>
             <Attribute>
-              <option name="separator" value="," />
+              <option name="separator" value=":" />
             </Attribute>
           </value>
         </entry>
-        <entry key="\data_mining\data\classify_describe_data_to_discrete.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data_mining\data\discrete_data_kmeans.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data_mining\data\discrete_data_width.csv">
+        <entry key="\data_mining\final_job\results\ec2_cpu_utilization_24ae8_threshold.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
